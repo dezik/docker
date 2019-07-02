@@ -9,6 +9,7 @@ services:
             - ./tomcat/logs:/usr/local/tomcat/logs
         depends_on:
             - mysql
+            - wiremock
     
     mysql:
         image: mysql:latest
@@ -18,3 +19,8 @@ services:
             - "3306:3306"
         volumes:
             - ./mysql/sql_scripts:/docker-entrypoint-initdb.d
+
+    wiremock:
+        image: holomekc/wiremock-gui:latest
+        ports:
+            - "9090:8080"
