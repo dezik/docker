@@ -2,15 +2,19 @@ version: "3"
 services:
     tomcat:
         build: ./tomcat
-        image: shabliad/tomcat:latest
+        image: shabliad/tomcat
+        restart: unless-stopped
         ports:
             - "8080:8080"
         volumes:
             - ./tomcat/logs:/usr/local/tomcat/logs
+            - ./tomcat/opts:/usr/local/tomcat/opts
+        environment:
+            JAVA_OPTS: -Xms256m -Xmx1024m -XX:+UseParallelOldGC -XX:MaxPermSize=384m -Ddwg.configurationFile=/usr/local/tomcat/opts/dwg/dwg.properties -Dddi.configurationFile=/usr/local/tomcat/opts/ddi/ddi.properties -Dspring.profiles.active=dev -Dmessenger.configurationFile=/usr/local/tomcat/opts/messenger/messenger.properties -Ddep.proxy.configurationFile=/usr/local/tomcat/opts/dep-proxy/dep-proxy.properties -Degov.idp.configLocation=/usr/local/tomcat/opts/idp -Degov.idp.system.admin.portal.configLocation=/usr/local/tomcat/opts/idp -Degov.idp.tenant.admin.portal.configLocation=/usr/local/tomcat/opts/idp -Degov.sp.configLocation=/usr/local/tomcat/opts/sp
         depends_on:
             - mysql
-            - wiremock
-    
+            - ldap
+
     mysql:
         image: mysql:latest
         environment:
@@ -22,5 +26,22 @@ services:
 
     wiremock:
         image: holomekc/wiremock-gui:latest
+        command:
+            java -XX:+PrintFlagsFinal $JAVA_OPTIONS -jar /home/wiremock/wiremock.jar --global-response-templating --port 9090
         ports:
-            - "9090:8080"
+            - "9090:9090"
+
+    ldap:
+        image: openidentityplatform/opendj:latest
+        user: root
+        environment:
+            ROOT_PASSWORD: password
+            BASE_DN: dc=gemalto,dc=com
+            PORT: 389
+            LDAPS_PORT: 636
+        volumes:
+          - ./ldap:/opt/opendj/bootstrap/schema/
+        ports:
+            - "389:389"
+            - "636:636"
+            - "4444:4444"

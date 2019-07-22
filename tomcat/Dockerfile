@@ -12,11 +12,8 @@ RUN chmod +x $CATALINA_HOME/scripts/*.sh
 COPY tomcat_conf/mysql-connector-java-8.0.16.jar $CATALINA_HOME/lib/mysql-connector-java-8.0.16.jar
 RUN chmod +x $CATALINA_HOME/lib/mysql-connector-java-8.0.16.jar
 
-# Copy config files
-COPY opt $CATALINA_HOME/opt
-
 # Copy webapps to container
-COPY webapps/*.war $CATALINA_HOME/webapps
+COPY webapps/*.war $CATALINA_HOME/webapps/
 
 WORKDIR $CATALINA_HOME
 
