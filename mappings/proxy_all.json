@@ -1,0 +1,11 @@
+{
+  "request": {
+    "method": "ANY"
+  },
+  "response": {
+    "status": 200,
+    "proxyBaseUrl": "http://tomcat:8080"
+  },
+  "persistent": true,
+  "priority": 999
+}
