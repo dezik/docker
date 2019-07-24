@@ -6,14 +6,17 @@ services:
         restart: unless-stopped
         ports:
             - "8080:8080"
+            - "8443:8443"
         volumes:
             - ./tomcat/logs:/usr/local/tomcat/logs
             - ./tomcat/opts:/usr/local/tomcat/opts
         environment:
-            JAVA_OPTS: -Xms256m -Xmx1024m -XX:+UseParallelOldGC -XX:MaxPermSize=384m -Ddwg.configurationFile=/usr/local/tomcat/opts/dwg/dwg.properties -Dddi.configurationFile=/usr/local/tomcat/opts/ddi/ddi.properties -Dspring.profiles.active=dev -Dmessenger.configurationFile=/usr/local/tomcat/opts/messenger/messenger.properties -Ddep.proxy.configurationFile=/usr/local/tomcat/opts/dep-proxy/dep-proxy.properties -Degov.idp.configLocation=/usr/local/tomcat/opts/idp -Degov.idp.system.admin.portal.configLocation=/usr/local/tomcat/opts/idp -Degov.idp.tenant.admin.portal.configLocation=/usr/local/tomcat/opts/idp -Degov.sp.configLocation=/usr/local/tomcat/opts/sp
+            JAVA_OPTS: -Xms256m -Xmx1024m -XX:+UseParallelOldGC -XX:MaxPermSize=384m -Dservice.configurationFile=/usr/local/tomcat/service.properties
+        entrypoint: ./scripts/wait-for-it.sh -t 60 mysql:3306 -- ./scripts/wait-for-it.sh -t 60 ldap:389 -- ./scripts/tomcat.sh
         depends_on:
             - mysql
             - ldap
+			- wiremock
 
     mysql:
         image: mysql:latest
@@ -36,7 +39,7 @@ services:
         user: root
         environment:
             ROOT_PASSWORD: password
-            BASE_DN: dc=gemalto,dc=com
+            BASE_DN: dc=sample,dc=com
             PORT: 389
             LDAPS_PORT: 636
         volumes:
